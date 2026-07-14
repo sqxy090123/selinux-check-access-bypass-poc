@@ -1,4 +1,3 @@
-```
 # SELinux libselinux `selinux_check_access()` 权限检查绕过 PoC
 
 本仓库演示了 `libselinux`（SELinux 用户空间库）中存在的一个逻辑缺陷：当使用**策略中不存在的客体类别（unknown class）** 调用 `selinux_check_access()` 时，如果系统的 `deny_unknown` 设置为 0（多数 Linux 发行版的默认值），该函数会错误地返回成功（0），从而绕过实际的 SELinux 权限检查。

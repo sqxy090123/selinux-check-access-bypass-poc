@@ -3,7 +3,7 @@
 ---
 
 ### 其它语言
-[中文版README](./README_CN.MD)
+- [中文版README](./README_CN.MD)
 
 ---
 

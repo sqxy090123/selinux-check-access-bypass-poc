@@ -2,7 +2,7 @@
 
 ---
 
-### 其它语言
+### OTHER LANGUAGES
 - [中文版README](./README_CN.MD)
 
 ---

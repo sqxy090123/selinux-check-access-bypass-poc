@@ -6,8 +6,9 @@
 
 - **影响组件**：`libselinux/src/checkAccess.c`
 - **危险函数**：`selinux_check_access()`
-- **缺陷根因**：当 `string_to_security_class()` 返回 0（未知类别）时，函数检查 `security_deny_unknown()`。若返回值为 0，则**直接返回 0（权限授予）**，而不向 `avc_has_perm()` 咨询实际的 SELinux 策略。
+- **缺陷根因**：当 `string_to_security_class()` 返回 0（表示未知类别）时，函数检查 `security_deny_unknown()`。若该值为 0，则**直接返回 0（权限授予）**，而不向 `avc_has_perm()` 查询实际的 SELinux 策略。
 - **安全影响**：非特权攻击者可构造恶意类别字符串，注入到使用该 API 的高特权进程中，使进程误认为操作已被允许，从而执行未授权操作，例如读取敏感文件（如 `/etc/shadow`）、执行系统命令或提权。
+- 注意：本漏洞不能直接绕过 SELinux 限制获得 root 权限，但可欺骗高特权进程执行任意命令，存在任意代码执行或提权的潜在风险。
 - **CVSS v3.1 评分**：7.8（高危）– AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H
 
 ## 受影响版本
@@ -49,19 +50,17 @@ labex
 [+] Command executed successfully (exit code: 0)
 ```
 
-## 若系统已修复或 deny_unknown=1，PoC 会报告 “NOT vulnerable”。
+若系统已修复或 deny_unknown=1，PoC 会报告 “NOT vulnerable”。
 
 ## 修复建议
 
 - 代码修复（推荐）：修改 selinux_check_access()，无论 deny_unknown 为何值，遇到未知类别或权限时始终返回错误（-1，errno=EINVAL）。
-- 临时缓解：以 root 身份设置 deny_unknown=1（echo 1 > /sys/fs/selinux/deny_unknown），但需评估对依赖旧行为的应用的影响。
+-临时缓解：以 root 身份设置 deny_unknown=1（echo 1 > /sys/fs/selinux/deny_unknown），但需评估对依赖旧行为的应用的影响。
 - 应用层防护：在调用 selinux_check_access() 前，对类别和权限字符串进行白名单校验，确保其存在于已加载的策略中。
 
-## 披露时间线
+## 发现日期
 
-- 发现日期：2026-07-14
-- 供应商报告状态：待提交（或尚未收到回复）
-- CVE 编号：[CVE-2026-XXXXX]（待分配）
+· 2026-07-14
 
 ## 法律免责声明
 
@@ -70,3 +69,4 @@ labex
 ## 许可证
 
 MIT
+
